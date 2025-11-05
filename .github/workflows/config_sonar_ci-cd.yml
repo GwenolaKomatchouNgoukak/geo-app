@@ -333,177 +333,177 @@ name: Geolocation App CI/CD
 
 # The workflow is designed to run on an Ubuntu environment and uses the latest versions of the actions for checkout, Java setup, and caching.
 
-on:
+# on:
 
- push:
+#  push:
 
-   branches:
+#    branches:
 
-     - main
-
- 
-
-permissions:
-
- id-token: write
-
- contents: read
+#      - main
 
  
 
-# GLOBAL ENV: Only GitHub secrets or constants
+# permissions:
 
-env:
+#  id-token: write
 
- ARTIFACTORY_URL: ${{ secrets.ARTIFACT_URL }}
-
- SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
- SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
- ECR_ROLE: ${{ secrets.ECR_ACESS_ROLE }}
-
- AWS_REGION: ${{ secrets.AWS_REGION }}
+#  contents: read
 
  
 
-jobs:
+# # GLOBAL ENV: Only GitHub secrets or constants
 
- build:
+# env:
 
-   runs-on: ubuntu-latest
+#  ARTIFACTORY_URL: ${{ secrets.ARTIFACT_URL }}
 
-   steps:
+#  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-     - uses: actions/checkout@v4
+#  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-       with:
+#  ECR_ROLE: ${{ secrets.ECR_ACESS_ROLE }}
 
-         fetch-depth: 0
-
- 
-
-     - name: Set up JDK 17
-
-       uses: actions/setup-java@v3
-
-       with:
-
-         distribution: 'temurin'
-
-         java-version: 17
-
-         cache: 'maven'
+#  AWS_REGION: ${{ secrets.AWS_REGION }}
 
  
 
-     - name: Cache Maven packages
+# jobs:
 
-       uses: actions/cache@v4
+#  build:
 
-       with:
+#    runs-on: ubuntu-latest
 
-         path: ~/.m2
+#    steps:
 
-         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+#      - uses: actions/checkout@v4
 
-         restore-keys: ${{ runner.os }}-m2
+#        with:
 
- 
-
-     - name: Build with Maven
-
-       run: mvn -B clean verify
+#          fetch-depth: 0
 
  
 
-     - name: Package with Maven
+#      - name: Set up JDK 17
 
-       run: mvn -B clean package
+#        uses: actions/setup-java@v3
 
- 
+#        with:
 
-     - name: Upload JAR file
+#          distribution: 'temurin'
 
-       uses: actions/upload-artifact@v4
+#          java-version: 17
 
-       with:
-
-         name: geo_app-jar
-
-         path: target/*.jar
+#          cache: 'maven'
 
  
 
- sonar:
+#      - name: Cache Maven packages
 
-   runs-on: ubuntu-latest
+#        uses: actions/cache@v4
 
-   needs: build
+#        with:
 
-   steps:
+#          path: ~/.m2
 
-     - uses: actions/checkout@v4
+#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
 
-       with:
-
-         fetch-depth: 0
+#          restore-keys: ${{ runner.os }}-m2
 
  
 
-     - name: Set up JDK 17
+#      - name: Build with Maven
 
-       uses: actions/setup-java@v3
-
-       with:
-
-         distribution: 'temurin'
-
-         java-version: 17
-
-         cache: 'maven'
+#        run: mvn -B clean verify
 
  
 
-     - name: Cache SonarQube packages
+#      - name: Package with Maven
 
-       uses: actions/cache@v4
-
-       with:
-
-         path: ~/.sonar/cache
-
-         key: ${{ runner.os }}-sonar
-
-         restore-keys: ${{ runner.os }}-sonar
+#        run: mvn -B clean package
 
  
 
-     - name: Cache Maven packages
+#      - name: Upload JAR file
 
-       uses: actions/cache@v4
+#        uses: actions/upload-artifact@v4
 
-       with:
+#        with:
 
-         path: ~/.m2
+#          name: geo_app-jar
 
-         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-
-         restore-keys: ${{ runner.os }}-m2
+#          path: target/*.jar
 
  
 
-     - name: SonarQube Scan
+#  sonar:
 
-       env:
+#    runs-on: ubuntu-latest
 
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#    needs: build
 
-         SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+#    steps:
 
-         SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+#      - uses: actions/checkout@v4
 
-       run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=geo_app -Dsonar.qualitygate.wait=true # Replace 'geo_app' with your actual project key
+#        with:
+
+#          fetch-depth: 0
+
+ 
+
+#      - name: Set up JDK 17
+
+#        uses: actions/setup-java@v3
+
+#        with:
+
+#          distribution: 'temurin'
+
+#          java-version: 17
+
+#          cache: 'maven'
+
+ 
+
+#      - name: Cache SonarQube packages
+
+#        uses: actions/cache@v4
+
+#        with:
+
+#          path: ~/.sonar/cache
+
+#          key: ${{ runner.os }}-sonar
+
+#          restore-keys: ${{ runner.os }}-sonar
+
+ 
+
+#      - name: Cache Maven packages
+
+#        uses: actions/cache@v4
+
+#        with:
+
+#          path: ~/.m2
+
+#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+
+#          restore-keys: ${{ runner.os }}-m2
+
+ 
+
+#      - name: SonarQube Scan
+
+#        env:
+
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+
+#          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+
+#        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=geo_app -Dsonar.qualitygate.wait=true # Replace 'geo_app' with your actual project key
 
     
 
@@ -521,4 +521,46 @@ jobs:
 
      #       sleepTime: 10  # Seconds between status checks
 
- 
+
+name: Geolocation App CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=geo-app

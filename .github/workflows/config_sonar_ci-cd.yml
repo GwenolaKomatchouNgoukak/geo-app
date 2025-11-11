@@ -415,4 +415,45 @@ jobs:
 
        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=geo_app -Dsonar.qualitygate.wait=true # Replace 'geo_app' with your actual project key
 
+ docker:
+  name: Docker Build & Push to ECR
+  runs-on: ubuntu-latest
+  needs: sonar
+  steps:
+   - name: Checkout Code
+     uses: actions/checkout@v4
+     with:
+      fetch-depth: 0
+   
+   - name: configure AWS Credentials
+     uses: aws-actions/configure-aws-credentials@v4
+     with:
+      role-to-assume: ${{ secrets.ECR_ACESS_ROLE }}
+      aws-region: ${{ secrets.AWS_REGION }}
+  
+   - name: Download JAR file artifact
+     uses: actions/download-artifact@v4
+     with:
+      name: geo-app-jar
+      path: target/
 
+   - name: Login to Amazon ECR
+     id: login-ecr
+     uses: aws-actions/amazon-ecr-login@v2
+
+
+   - name: Build Docker image
+     run: |
+      docker build -t geo_app:${{ github.sha }} .
+
+   - name: Tag image for ECR
+     run: |
+      APP_VERSION=`grep -m2 '<version>' pom.xml | tail -1 | grep -oP '(?<=>).*(?=<)'`
+      echo $APP_VERSION
+
+   - name: Push Docker image to ECR
+     run: |
+      APP_VERSION=`grep -m2 '<version>' pom.xml | tail -1 | grep -oP '(?<=>).*(?=<)'`
+      echo $APP_VERSION
+      docker push ${{ steps.login-ecr.outputs.registry }}/geo_app:${{ github.sha }}
+      docker push ${{ steps.login-ecr.outputs.registry }}/geo_app:$APP_VERSION
